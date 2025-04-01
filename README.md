@@ -9,22 +9,22 @@ MYSQL Version 8.0
 
 ### Склонируйте репозиторий
 ```bash
-    git clone https://github.com/VitaliiPopov00/musify-api.git
+git clone https://github.com/VitaliiPopov00/musify-api.git
 ```
 перейдите в папку с проектом
 ```bash
-    cd musify-api
+cd musify-api
 ```
 
 ### Установите зависимости Composer
 ``` bash
-    composer install
+composer install
 ```
 
 ### Настройте файл окружения .env
 Скопируйте файл .env и настройте параметры:
 ```bash
-    cp .env .env.local
+cp .env .env.local
 ```
 Параметры .env для соединения к БД (обязательны к заполнению), лучше всего заполнять их в файле .env.local, созданном ранее:
 * DB_USER
@@ -35,7 +35,7 @@ MYSQL Version 8.0
 
 ### Создайте базу данных, которую вы указали в переменной DB_NAME
 ```bash
-    php bin/console doctrine:database:create
+php bin/console doctrine:database:create
 ```
 Если появляется ошибка:
 ```SQL
@@ -48,10 +48,10 @@ SQLSTATE[HY000]: General error: 1007 Can`t create database `DB_NAME`; database e
 
 ### Выполните миграции
 ```bash
-    php bin/console doctrine:migrations:migrate
+php bin/console doctrine:migrations:migrate
 ```
 
 ### Запустите встроенный сервер
 ```bash
-    symfony server:start -d
+symfony server:start -d
 ```
