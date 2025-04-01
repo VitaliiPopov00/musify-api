@@ -4,17 +4,37 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "api-platform/doctrine-orm": "*",
+        "api-platform/symfony": "*",
+        "doctrine/dbal": "^4.2",
+        "doctrine/doctrine-bundle": "^2.14",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
+        "doctrine/orm": "^3.3",
+        "jms/serializer-bundle": "^5.5",
+        "nelmio/api-doc-bundle": "^5.0",
+        "nelmio/cors-bundle": "^2.5",
+        "phpdocumentor/reflection-docblock": "^5.6",
+        "phpstan/phpdoc-parser": "^2.1",
+        "spatie/data-transfer-object": "^3.9",
+        "symfony/asset": "6.4.*",
+        "symfony/cache": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/dotenv": "6.4.*",
+        "symfony/expression-language": "6.4.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.4.*",
+        "symfony/monolog-bundle": "^3.10",
+        "symfony/property-access": "6.4.*",
+        "symfony/property-info": "6.4.*",
         "symfony/runtime": "6.4.*",
+        "symfony/security-bundle": "6.4.*",
+        "symfony/serializer": "6.4.*",
+        "symfony/twig-bundle": "6.4.*",
+        "symfony/validator": "6.4.*",
         "symfony/yaml": "6.4.*"
-    },
-    "require-dev": {
     },
     "config": {
         "allow-plugins": {
@@ -63,5 +83,11 @@
             "allow-contrib": false,
             "require": "6.4.*"
         }
+    },
+    "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
+        "fakerphp/faker": "^1.24",
+        "symfony/maker-bundle": "^1.62",
+        "symfony/phpunit-bridge": "^7.2"
     }
 }
