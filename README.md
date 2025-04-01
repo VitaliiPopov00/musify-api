@@ -57,10 +57,8 @@ symfony server:start -d
 ```
 
 ---
-<p align="center" style="font-style: italic">
-    <font color="#8e8e8e">
-        vpopov
-        <br>
-        and by javalets team
-    </font>
+<p align="center" style="font-style: italic; color: #8e8e8e">
+    vpopov
+    <br>
+    and by javalets team
 </p>
