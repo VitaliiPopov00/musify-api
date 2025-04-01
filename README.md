@@ -55,3 +55,10 @@ php bin/console doctrine:migrations:migrate
 ```bash
 symfony server:start -d
 ```
+
+---
+<center style="color: #8e8e8e; font-style: italic">
+vpopov
+<br>
+and by javalets team
+</center>
