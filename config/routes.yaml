@@ -1,4 +1,14 @@
-api_start:
-    path: /api
-    controller: App\Controller\ApiController::index
-    methods: GET
+user_register:
+    path: /api/user/register
+    controller: App\Controller\User\UserController::create
+    methods: POST
+
+user_login:
+    path: /api/user/login
+    controller: App\Controller\User\UserController::login
+    methods: POST
+
+user_logout:
+    path: /api/user/logout
+    controller: App\Controller\User\UserController::logout
+    methods: POST

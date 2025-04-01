@@ -1,0 +1,212 @@
+{
+	"info": {
+		"_postman_id": "4f1d1f3b-8dd9-4a2b-895a-890d76cab80f",
+		"name": "musify_api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34730346"
+	},
+	"item": [
+		{
+			"name": "Регистрация нового пользователя (200)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"user\",\r\n    \"password\": \"password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/api/user/register",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Авторизация пользователя (200)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"vpopov\",\r\n    \"password\": \"Xperiae1.\"\r\n}"
+				},
+				"url": {
+					"raw": "{{domain}}/api/user/login",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Авторизация пользователя (400)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"\",\r\n    \"password\": \"\"\r\n}"
+				},
+				"url": {
+					"raw": "{{domain}}/api/user/login",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Выход (200)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var request = {\r",
+							"    \"url\": pm.environment.get(\"domain\") + \"/api/user/login\",\r",
+							"    \"method\": \"POST\",\r",
+							"    \"headers\": {\r",
+							"        \"Content-Type\": \"application/json\"\r",
+							"    },\r",
+							"    \"body\": JSON.stringify({\r",
+							"        \"login\": pm.environment.get(\"default_user_login\"),\r",
+							"        \"password\": pm.environment.get(\"default_user_password\")\r",
+							"    }),\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(request, (err, res) => {\r",
+							"    var result = res.json();\r",
+							"    console.log(result);\r",
+							"    pm.environment.set('token', result.data.token);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{domain}}/api/user/logout",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Выход (401)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{domain}}/api/user/logout",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
