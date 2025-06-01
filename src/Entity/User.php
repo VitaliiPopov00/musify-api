@@ -3,59 +3,54 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as AppAssert;
 
-#[UniqueEntity(
-    fields: ['login'],
-    message: 'Уже занято'
-)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
-#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 255)]
-    #[ORM\Column(
-        type: 'string',
-        length: 255
-    )]
-    #[AppAssert\UniqueUserLogin]
+    #[ORM\Column(type: Types::STRING)]
     private string $login;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: Types::STRING)]
     private string $password;
 
-    #[ORM\JoinColumn(nullable: false)]
     #[ORM\ManyToOne(
         targetEntity: Role::class,
         inversedBy: 'users'
     )]
+    #[ORM\JoinColumn(
+        name: 'role_id',
+        referencedColumnName: 'id',
+        nullable: false
+    )]
     private Role $role;
 
+    #[ORM\OneToOne(
+        mappedBy: 'user',
+        targetEntity: Singer::class,
+    )]
+    private ?Singer $singer = null;
+
     #[ORM\Column(
-        type: 'string',
-        length: 255,
-        unique: true,
+        type: Types::STRING,
         nullable: true
     )]
     private ?string $token = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -96,15 +91,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->updatedAt;
     }
 
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): static
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-
-        return $this;
-    }
-
     public function getPassword(): string
     {
         return $this->password;
@@ -113,14 +99,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
-        return $this;
-    }
-
-    #[ORM\PreUpdate]
-    public function setUpdatedAtValue(): static
-    {
-        $this->updatedAt = new \DateTimeImmutable();
 
         return $this;
     }
@@ -156,5 +134,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials()
     {
+    }
+
+    public function getSinger(): ?Singer
+    {
+        return $this->singer;
+    }
+
+    public function setSinger(?Singer $singer): static
+    {
+        $this->singer = $singer;
+
+        return $this;
     }
 }

@@ -12,3 +12,33 @@ user_logout:
     path: /api/user/logout
     controller: App\Controller\User\UserController::logout
     methods: POST
+
+singer_create:
+    path: /api/singer
+    controller: App\Controller\Singer\SingerController::create
+    methods: POST
+
+song_upload:
+    path: /api/song
+    controller: App\Controller\Song\SongController::upload
+    methods: POST
+
+song_stream:
+    path: /api/song/{artistId}/{songId}/stream
+    controller: App\Controller\Song\SongController::streamSong
+    methods: GET
+    requirements:
+        artistId: \d+
+        songId: \d+
+
+singer_playlist:
+    path: /api/singer/{singerId}/playlist
+    controller: App\Controller\Singer\SingerController::getPlaylist
+    methods: GET
+    requirements:
+        singerId: \d+
+
+song_latest:
+    path: /api/song/latest
+    controller: App\Controller\Song\SongController::getLatestSongs
+    methods: GET

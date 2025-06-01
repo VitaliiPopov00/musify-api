@@ -15,6 +15,11 @@ security:
             stateless: true
             security: true
 
+        public_stream:
+            pattern: ^/api/song/\d+/\d+/stream
+            stateless: true
+            security: false
+
         api:
             pattern: ^/api
             stateless: true

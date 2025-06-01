@@ -17,7 +17,9 @@ final class Version20250401193542 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql(<<<SQL
-            INSERT INTO `role` (`title`) VALUES ('admin'), ('user')
+            INSERT INTO `role` (`title`) VALUES 
+                ('admin'),
+                ('user')
         SQL);
     }
 

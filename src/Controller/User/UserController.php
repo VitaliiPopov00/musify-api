@@ -2,22 +2,21 @@
 
 namespace App\Controller\User;
 
+use App\Controller\DefaultController;
 use App\Dto\LoginDto;
 use App\Dto\RegisterDto;
 use App\Entity\User;
 use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class UserController extends AbstractController
+class UserController extends DefaultController
 {
     public function create(
         Request $request,
@@ -44,9 +43,7 @@ class UserController extends AbstractController
         $user = new User();
         $user->setLogin($registerDto->login);
         $user->setPassword($passwordHasher->hashPassword($user, $registerDto->password));
-        $user->setRole(
-            $roleRepository->getUserRole()
-        );
+        $user->setRole($roleRepository->getUserRole());
 
         $entityManager->persist($user);
         $entityManager->flush();
@@ -91,7 +88,7 @@ class UserController extends AbstractController
                     'code' => Response::HTTP_UNAUTHORIZED,
                     'message' => sprintf('User with login "%s" not found', $loginDto->login),
                 ],
-            ]);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         if (!$passwordHasher->isPasswordValid($user, $loginDto->password)) {
@@ -101,7 +98,7 @@ class UserController extends AbstractController
                     'code' => Response::HTTP_UNAUTHORIZED,
                     'message' => 'Incorrect password',
                 ],
-            ]);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         $user->generateToken();
@@ -126,11 +123,7 @@ class UserController extends AbstractController
         EntityManagerInterface $entityManager,
     ): JsonResponse
     {
-        $authorizationHeader = $request->headers->get('Authorization');
-        $token = substr($authorizationHeader, 7);
-
-        /** @var User $user */
-        $user = $userRepository->findOneBy(['token' => $token]);
+        $user = $this->getAuthUser($request, $userRepository);
         $user->clearToken();
 
         $entityManager->persist($user);
@@ -142,24 +135,5 @@ class UserController extends AbstractController
                 'message' => 'Logout is successful',
             ],
         ]);
-
-    }
-
-    private function errorValidationResponse(ConstraintViolationListInterface $errors): JsonResponse
-    {
-        $errorMessages = [];
-
-        foreach ($errors as $error) {
-            $errorMessages[$error->getPropertyPath()][] = $error->getMessage();
-        }
-
-        return $this->json([
-            'success' => false,
-            'error' => [
-                'code' => Response::HTTP_BAD_REQUEST,
-                'message' => 'Error validation',
-                'errors' => $errorMessages
-            ]
-        ], Response::HTTP_BAD_REQUEST);
     }
 }

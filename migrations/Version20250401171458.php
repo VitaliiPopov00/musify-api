@@ -21,7 +21,7 @@ final class Version20250401171458 extends AbstractMigration
                 `id`    INT AUTO_INCREMENT NOT NULL,
                 `title` VARCHAR(255) NOT NULL,
                 PRIMARY KEY(`id`)
-            ) DEFAULT CHARACTER SET utf8mb4
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
         SQL);
     }
 

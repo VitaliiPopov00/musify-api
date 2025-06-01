@@ -11,7 +11,7 @@ class LoginDto
         public string $login,
 
         #[Assert\NotBlank(message: "Password is required")]
-        public string $password
+        public string $password,
     )
     {
     }

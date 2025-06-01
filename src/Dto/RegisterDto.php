@@ -19,9 +19,16 @@ class RegisterDto
         #[Assert\NotBlank(message: 'Password is required')]
         #[Assert\Length(
             min: 6,
-            minMessage: 'Login is too short'
+            minMessage: 'Password is too short'
         )]
-        public string $password
+        public string $password,
+
+        #[Assert\NotBlank(message: 'Password repeat is required')]
+        #[Assert\EqualTo(
+            propertyPath: 'password',
+            message: 'Passwords do not match'
+        )]
+        public string $passwordRepeat
     )
     {
     }
