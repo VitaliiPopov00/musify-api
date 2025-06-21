@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
@@ -14,7 +18,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING)]
@@ -51,6 +55,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: FavoriteSong::class, orphanRemoval: true)]
+    private Collection $favoriteSongs;
+
+    public function __construct()
+    {
+        $this->favoriteSongs = new ArrayCollection();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -144,6 +158,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setSinger(?Singer $singer): static
     {
         $this->singer = $singer;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FavoriteSong>
+     */
+    public function getFavoriteSongs(): Collection
+    {
+        return $this->favoriteSongs;
+    }
+
+    public function addFavoriteSong(FavoriteSong $favoriteSong): static
+    {
+        if (!$this->favoriteSongs->contains($favoriteSong)) {
+            $this->favoriteSongs->add($favoriteSong);
+            $favoriteSong->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavoriteSong(FavoriteSong $favoriteSong): static
+    {
+        if ($this->favoriteSongs->removeElement($favoriteSong)) {
+            if ($favoriteSong->getUser() === $this) {
+                $favoriteSong->setUser(null);
+            }
+        }
 
         return $this;
     }

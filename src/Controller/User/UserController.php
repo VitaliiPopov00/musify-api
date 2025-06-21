@@ -136,4 +136,40 @@ class UserController extends DefaultController
             ],
         ]);
     }
+
+    public function profile(
+        Request $request,
+        UserRepository $userRepository,
+    ): JsonResponse
+    {
+        $user = $this->getAuthUser(
+            $request,
+            $userRepository
+        );
+
+        $data = [
+            'id' => $user->getId(),
+            'login' => $user->getLogin(),
+            'role' => $user->getRole()->getTitle(),
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
+        ];
+
+        if ($user->getSinger()) {
+            $singer = $user->getSinger();
+
+            $data['singer'] = [
+                'id' => $singer->getId(),
+                'name' => $singer->getName(),
+                'description' => $singer->getDescription(),
+                'createdAt' => $singer->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $singer->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return $this->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 }

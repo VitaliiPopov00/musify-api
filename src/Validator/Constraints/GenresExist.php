@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute]
 class GenresExist extends Constraint
 {
-    public string $message = 'The genre "{{ genre }}" does not exist.';
+    public string $message = 'The genre with id "{{ genre }}" does not exist.';
 
     public function validatedBy(): string
     {

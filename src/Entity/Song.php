@@ -22,11 +22,11 @@ class Song
     #[ORM\Column(type: Types::INTEGER, options: ["default" => 0], nullable: true)]
     private ?int $playCount = 0;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToMany(
         targetEntity: Singer::class,
@@ -45,8 +45,8 @@ class Song
     {
         $this->singers = new ArrayCollection();
         $this->genres = new ArrayCollection();
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -76,12 +76,12 @@ class Song
         return sprintf('uploads/%d/%d.mp3', $singer->getId(), $this->getId());
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
@@ -142,7 +142,7 @@ class Song
     public function incrementPlayCount(): self
     {
         $this->playCount++;
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new \DateTimeImmutable();
         
         return $this;
     }

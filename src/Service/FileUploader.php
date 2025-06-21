@@ -5,11 +5,11 @@ namespace App\Service;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-readonly class FileUploader
+class FileUploader
 {
     public function __construct(
-        private readonly string $uploadDirectory,
-        private readonly SluggerInterface $slugger
+        private string $uploadDirectory,
+        private SluggerInterface $slugger
     ) {
     }
 

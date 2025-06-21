@@ -25,7 +25,7 @@ class GenresExistValidator extends ConstraintValidator
         }
 
         foreach ($value as $genre) {
-            if (!$this->genreRepository->findOneBy(['title' => $genre])) {
+            if (!$this->genreRepository->findOneBy(['id' => $genre])) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ genre }}', $genre)
                     ->addViolation();

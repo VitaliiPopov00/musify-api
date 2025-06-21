@@ -29,11 +29,14 @@ class SingerCreateDto
         )]
         #[Assert\All([
             new Assert\NotBlank,
-            new Assert\Type(type: Types::STRING),
-            new Assert\Length(max: 60)
+            new Assert\Type(type: Types::INTEGER)
         ])]
         #[AppAssert\GenresExist]
         public array $genres = [],
+
+        #[Assert\Length(max: 30)]
+        #[Assert\Type('string')]
+        public ?string $customGenre = null,
     )
     {
     }

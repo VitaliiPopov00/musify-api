@@ -13,6 +13,7 @@
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
+        "james-heinrich/getid3": "^1.9",
         "jms/serializer-bundle": "^5.5",
         "nelmio/api-doc-bundle": "^5.0",
         "nelmio/cors-bundle": "^2.5",

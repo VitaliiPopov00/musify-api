@@ -42,3 +42,108 @@ song_latest:
     path: /api/song/latest
     controller: App\Controller\Song\SongController::getLatestSongs
     methods: GET
+
+genre_list:
+    path: /api/genre
+    controller: App\Controller\Genre\GenreController::list
+    methods: GET
+
+user_profile:
+    path: /api/user/profile
+    controller: App\Controller\User\UserController::profile
+    methods: GET
+
+api_song_favorite_add:
+    path: /api/song/{songId}/favorite
+    methods: POST
+    controller: App\Controller\Song\SongController::addToFavorites
+
+api_song_favorite_remove:
+    path: /api/song/{songId}/favorite
+    methods: DELETE
+    controller: App\Controller\Song\SongController::removeFromFavorites
+
+api_song_user_favorite:
+    path: /api/song/user/favorite
+    methods: GET
+    controller: App\Controller\Song\SongController::getUserFavoriteSongs
+
+api_user_playlist_create:
+    path: /api/user/playlists
+    methods: POST
+    controller: App\Controller\UserPlaylist\UserPlaylistController::create
+
+api_user_playlist_list:
+    path: /api/user/playlists
+    methods: GET
+    controller: App\Controller\UserPlaylist\UserPlaylistController::getUserPlaylists
+
+api_user_playlist_add_song:
+    path: /api/user/playlists/{id}/songs
+    methods: POST
+    controller: App\Controller\UserPlaylist\UserPlaylistController::addSong
+
+api_user_playlist_get:
+    path: /api/user/playlists/{id}
+    methods: GET
+    controller: App\Controller\UserPlaylist\UserPlaylistController::get
+
+api_release_create:
+    path: /api/release
+    methods: POST
+    controller: App\Controller\Release\ReleaseController::create
+
+api_release_get:
+    path: /api/release/{id}
+    methods: GET
+    controller: App\Controller\Release\ReleaseController::get
+
+api_singer_songs:
+    path: /api/singer/{singerId}/songs
+    methods: GET
+    controller: App\Controller\Singer\SingerController::getSongs
+
+api_singer_info:
+    path: /api/singer/{singerId}
+    methods: GET
+    controller: App\Controller\Singer\SingerController::getSingerInfo
+
+api_singer_subscribe:
+    path: /api/subscribe/singer/{singerId}
+    methods: POST
+    controller: App\Controller\Subscribe\SubscribeController::subscribe
+
+api_singer_unsubscribe:
+    path: /api/subscribe/singer/{singerId}
+    methods: DELETE
+    controller: App\Controller\Subscribe\SubscribeController::unsubscribe
+
+api_release_by_singer:
+    path: /api/releases/singer/{singerId}
+    methods: GET
+    controller: App\Controller\Release\ReleaseController::getBySinger
+
+api_search:
+    path: /api/search
+    methods: GET
+    controller: App\Controller\Search\SearchController::search
+
+api_increment_song:
+    path: /api/song/{songId}/increment
+    methods: GET
+    controller: App\Controller\Song\SongController::incrementPlayCount
+
+api_user_playlist_delete:
+    path: /api/user/playlists/{playlistId}
+    methods: DELETE
+    controller: App\Controller\UserPlaylist\UserPlaylistController::delete
+
+api_user_playlist_delete_song:
+    path: /api/user/playlists/{playlistId}/{songId}
+    methods: DELETE
+    controller: App\Controller\UserPlaylist\UserPlaylistController::removeSong
+
+api_user_history_playlist:
+    path: /api/user/history
+    methods: GET
+    controller: App\Controller\ListeningHistory\ListeningHistoryController::history

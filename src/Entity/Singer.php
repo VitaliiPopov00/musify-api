@@ -57,25 +57,11 @@ class Singer
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\PrePersist]
-    public function setCreatedAt(): static
-    {
-        $this->createdAt = new \DateTimeImmutable();
-
-        return $this;
-    }
-
-    #[ORM\PreUpdate] 
-    public function setUpdatedAt(): static
-    {
-        $this->updatedAt = new \DateTimeImmutable();
-
-        return $this;
-    }
-
     public function __construct()
     {
         $this->genres = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
