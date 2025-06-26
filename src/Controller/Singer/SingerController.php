@@ -117,6 +117,25 @@ class SingerController extends DefaultController
         $total = $singer->getSongs()->count();
 
         foreach ($songs as $song) {
+            // Проверяем, что песня из опубликованного релиза
+            $releaseSong = $entityManager->getRepository(ReleaseSong::class)
+                ->createQueryBuilder('rs')
+                ->leftJoin('rs.release', 'r')
+                ->where('rs.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->getOneOrNullResult();
+            
+            // Пропускаем песни из неопубликованных релизов и пользовательские треки
+            if ($releaseSong && !$releaseSong->getRelease()->getIsReleased()) {
+                continue;
+            }
+            
+            // Пропускаем пользовательские треки
+            if ($song->isUserSong()) {
+                continue;
+            }
+            
             $singers = [];
             foreach ($song->getSingers() as $songSinger) {
                 $singers[] = [
@@ -181,7 +200,11 @@ class SingerController extends DefaultController
             ->createQueryBuilder('s')
             ->select('DISTINCT s.id, s.playCount')
             ->leftJoin('s.singers', 'singers')
+            ->leftJoin('App\Entity\ReleaseSong', 'rs', 'WITH', 'rs.song = s')
+            ->leftJoin('rs.release', 'r')
             ->where('singers.id = :singerId')
+            ->andWhere('r.isReleased = 1 OR r.id IS NULL')
+            ->andWhere('s.isUserSong = 0')
             ->setParameter('singerId', $singerId)
             ->orderBy('s.playCount', 'DESC')
             ->setMaxResults($limit);
@@ -308,11 +331,30 @@ class SingerController extends DefaultController
         ]);
         $isSubscribe = $subscribe !== null;
 
+        // Получаем жанры исполнителя
+        $genres = [];
+        foreach ($singer->getGenres() as $genre) {
+            $genres[] = [
+                'id' => $genre->getId(),
+                'title' => $genre->getTitle(),
+            ];
+        }
+
+        // Получаем кастомный жанр исполнителя
+        $customGenre = $entityManager->getRepository(CustomGenre::class)
+            ->findOneBy([
+                'entityType' => CustomGenreEnum::singer->value,
+                'entityId' => $singer->getId()
+            ]);
+
         return $this->json([
             'success' => true,
             'data' => [
                 'id' => $singer->getId(),
                 'name' => $singer->getName(),
+                'description' => $singer->getDescription(),
+                'genres' => $genres,
+                'custom_genre' => $customGenre ? $customGenre->getTitle() : null,
                 'totalPlayCount' => (int) $totalPlayCount,
                 'isSubscribe' => $isSubscribe,
                 'singerIsUser' => $singer->getUser()->getId() === $user->getId(),

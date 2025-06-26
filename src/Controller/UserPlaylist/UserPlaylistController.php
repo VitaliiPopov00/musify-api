@@ -9,8 +9,10 @@ use App\Entity\Song;
 use App\Entity\UserPlaylist;
 use App\Entity\UserPlaylistSong;
 use App\Entity\FavoriteSong;
+use App\Entity\ReleaseSong;
 use App\Repository\SongRepository;
 use App\Repository\UserRepository;
+use App\Repository\UserSongRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -99,6 +101,7 @@ class UserPlaylistController extends DefaultController
     public function getUserPlaylists(
         Request $request,
         UserRepository $userRepository,
+        UserSongRepository $userSongRepository,
     ): JsonResponse
     {
         $user = $this->getAuthUser($request, $userRepository);
@@ -107,6 +110,29 @@ class UserPlaylistController extends DefaultController
             ->findBy(['createdBy' => $user->getId()], ['id' => 'DESC']);
 
         $result = [];
+
+        $userSongs = $userSongRepository->findByUser($user);
+
+        $songs = [];
+        foreach ($userSongs as $userSong) {
+            $song = $userSong->getSong();
+            $songs[] = [
+                'id' => $song->getId(),
+                'title' => $song->getTitle(),
+                'play_count' => $song->getPlayCount(),
+                'is_user_song' => true,
+                'created_at' => $song->getCreatedAt()->format('Y-m-d H:i:s'),
+                'uploaded_at' => $userSong->getCreatedAt()->format('Y-m-d H:i:s')
+            ];
+        }
+
+        $result[] = [
+            'id' => -1,
+            'title' => 'Мои загруженные треки',
+            'songCount' => count($songs),
+            'songs' => $songs
+        ];
+
         foreach ($playlists as $playlist) {
             $firstSong = $this->entityManager->getRepository(UserPlaylistSong::class)
                 ->findOneBy(['playlist' => $playlist], ['id' => 'ASC']);
@@ -160,6 +186,26 @@ class UserPlaylistController extends DefaultController
         foreach ($playlist->getSongs() as $playlistSong) {
             /** @var Song $song */
             $song = $playlistSong->getSong();
+            
+            // Проверяем, что песня из опубликованного релиза
+            $releaseSong = $this->entityManager->getRepository(ReleaseSong::class)
+                ->createQueryBuilder('rs')
+                ->leftJoin('rs.release', 'r')
+                ->where('rs.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->getOneOrNullResult();
+            
+            // Пропускаем песни из неопубликованных релизов и пользовательские треки
+            if ($releaseSong && !$releaseSong->getRelease()->getIsReleased()) {
+                continue;
+            }
+            
+            // Пропускаем пользовательские треки
+            if ($song->isUserSong()) {
+                continue;
+            }
+            
             $songSingers = [];
             foreach ($song->getSingers() as $singer) {
                 $songSingers[] = [

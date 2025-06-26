@@ -15,4 +15,14 @@ class GenreRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Genre::class);
     }
+
+    public function findOneByTitleIgnoreCase(string $title): ?Genre
+    {
+        $qb = $this->createQueryBuilder('g');
+        
+        return $qb->where('LOWER(g.title) = LOWER(:title)')
+            ->setParameter('title', $title)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

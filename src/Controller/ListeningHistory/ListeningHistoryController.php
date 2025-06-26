@@ -22,7 +22,17 @@ class ListeningHistoryController extends DefaultController
         $user = $this->getAuthUser($request, $userRepository);
 
         $listeningHistory = $entityManager->getRepository(ListeningHistory::class)
-            ->findBy(['user' => $user], ['listenedAt' => 'DESC']);
+            ->createQueryBuilder('lh')
+            ->leftJoin('lh.song', 's')
+            ->leftJoin('App\Entity\ReleaseSong', 'rs', 'WITH', 'rs.song = s')
+            ->leftJoin('rs.release', 'r')
+            ->where('lh.user = :user')
+            ->andWhere('r.isReleased = 1 OR r.id IS NULL')
+            ->andWhere('s.isUserSong = 0')
+            ->setParameter('user', $user)
+            ->orderBy('lh.listenedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         $historyData = [];
         foreach ($listeningHistory as $historyEntry) {

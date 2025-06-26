@@ -190,4 +190,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getIsAdmin(): bool
+    {
+        return $this->getRole()->getId() === 1;
+    }
 }

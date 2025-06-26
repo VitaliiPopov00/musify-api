@@ -28,6 +28,9 @@ class Song
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ["default" => false])]
+    private bool $isUserSong = false;
+
     #[ORM\ManyToMany(
         targetEntity: Singer::class,
         mappedBy: 'songs'
@@ -47,6 +50,7 @@ class Song
         $this->genres = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->isUserSong = false;
     }
 
     public function getId(): ?int
@@ -84,6 +88,18 @@ class Song
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function isUserSong(): bool
+    {
+        return $this->isUserSong;
+    }
+
+    public function setIsUserSong(bool $isUserSong): static
+    {
+        $this->isUserSong = $isUserSong;
+
+        return $this;
     }
 
     public function getSingers(): Collection

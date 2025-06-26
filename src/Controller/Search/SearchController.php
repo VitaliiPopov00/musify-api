@@ -34,6 +34,7 @@ class SearchController extends DefaultController
         // Поиск релизов
         $releases = $this->releaseRepository->createQueryBuilder('r')
             ->where('r.title LIKE :query')
+            ->andWhere('r.isReleased = 1')
             ->setParameter('query', '%' . $query . '%')
             ->getQuery()
             ->getResult();
@@ -54,7 +55,11 @@ class SearchController extends DefaultController
 
         // Поиск песен
         $songs = $this->songRepository->createQueryBuilder('s')
+            ->leftJoin('App\Entity\ReleaseSong', 'rs', 'WITH', 'rs.song = s')
+            ->leftJoin('rs.release', 'r')
             ->where('s.title LIKE :query')
+            ->andWhere('r.isReleased = 1 OR r.id IS NULL')
+            ->andWhere('s.isUserSong = 0')
             ->setParameter('query', '%' . $query . '%')
             ->getQuery()
             ->getResult();

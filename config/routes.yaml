@@ -123,6 +123,11 @@ api_release_by_singer:
     methods: GET
     controller: App\Controller\Release\ReleaseController::getBySinger
 
+api_future_release_by_singer:
+    path: /api/releases/singer/{singerId}/future
+    methods: GET
+    controller: App\Controller\Release\ReleaseController::getBySingerFuture
+
 api_search:
     path: /api/search
     methods: GET
@@ -147,3 +152,58 @@ api_user_history_playlist:
     path: /api/user/history
     methods: GET
     controller: App\Controller\ListeningHistory\ListeningHistoryController::history
+
+api_admin_genres:
+    path: /api/admin/genres
+    methods: GET
+    controller: App\Controller\Admin\Genre\GenreController::genres
+
+api_admin_genres_create:
+    path: /api/admin/genres
+    methods: POST
+    controller: App\Controller\Admin\Genre\GenreController::createGenre
+
+api_admin_genres_delete:
+    path: /api/admin/genres/{id}
+    methods: DELETE
+    controller: App\Controller\Admin\Genre\GenreController::deleteGenre
+
+api_admin_custom_genres_delete:
+    path: /api/admin/custom-genres
+    methods: DELETE
+    controller: App\Controller\Admin\Genre\GenreController::deleteCustomGenre
+
+api_admin_custom_genres_promote:
+    path: /api/admin/custom-genres/promote
+    methods: POST
+    controller: App\Controller\Admin\Genre\GenreController::promoteCustomGenre
+
+api_admin_statistics:
+    path: /api/admin/statistics
+    methods: GET
+    controller: App\Controller\Admin\AdminController::statistics
+
+api_song_delete:
+    path: /api/song/{songId}
+    methods: DELETE
+    controller: App\Controller\Song\SongController::deleteSong
+
+api_release_delete:
+    path: /api/release/{releaseId}
+    methods: DELETE
+    controller: App\Controller\Release\ReleaseController::deleteRelease
+
+api_user_song_et:
+    path: /api/user/song
+    methods: GET
+    controller: App\Controller\UserSong\UserSongController::getUserSongs
+
+api_user_song_upload:
+    path: /api/user/song
+    methods: POST
+    controller: App\Controller\UserSong\UserSongController::uploadSongs
+
+api_user_song_delete:
+    path: /api/user/song/{songId}
+    methods: DELETE
+    controller: App\Controller\UserSong\UserSongController::deleteUserSong

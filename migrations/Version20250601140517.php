@@ -24,6 +24,7 @@ final class Version20250601140517 extends AbstractMigration
                 id INT AUTO_INCREMENT NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 play_count INT NOT NULL DEFAULT 0,
+                is_user_song TINYINT(1) NOT NULL DEFAULT 0,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY(id)

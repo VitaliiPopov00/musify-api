@@ -11,6 +11,7 @@ use App\Entity\Song;
 use App\Entity\Release;
 use App\Entity\ReleaseSong;
 use App\Entity\Singer;
+use App\Entity\ReleaseSinger;
 use App\Enum\CustomGenreEnum;
 use App\Repository\FavoriteSongRepository;
 use App\Repository\GenreRepository;
@@ -26,6 +27,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use getID3;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\UserPlaylistSong;
 
 class SongController extends DefaultController
 {
@@ -173,7 +175,7 @@ class SongController extends DefaultController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if (null !== $songCustomGenre) {
+        if (!empty($songCustomGenre)) {
             $customGenre = new CustomGenre(
                 title: $songCustomGenre,
                 entityType: CustomGenreEnum::song->value,
@@ -217,7 +219,11 @@ class SongController extends DefaultController
             ->createQueryBuilder('s')
             ->leftJoin('s.singers', 'singers')
             ->leftJoin('s.genres', 'genres')
+            ->leftJoin('App\Entity\ReleaseSong', 'rs', 'WITH', 'rs.song = s')
+            ->leftJoin('rs.release', 'r')
             ->select('s', 'singers', 'genres')
+            ->where('r.isReleased = 1 OR r.id IS NULL')
+            ->andWhere('s.isUserSong = 0')
             ->orderBy('s.createdAt', 'DESC')
             ->setMaxResults(10)
             ->getQuery()
@@ -387,7 +393,11 @@ class SongController extends DefaultController
             ->leftJoin('fs.song', 's')
             ->leftJoin('s.singers', 'singers')
             ->leftJoin('s.genres', 'genres')
+            ->leftJoin('App\Entity\ReleaseSong', 'rs', 'WITH', 'rs.song = s')
+            ->leftJoin('rs.release', 'r')
             ->where('fs.user = :user')
+            ->andWhere('r.isReleased = 1 OR r.id IS NULL')
+            ->andWhere('s.isUserSong = 0')
             ->setParameter('user', $user)
             ->orderBy('fs.createdAt', 'DESC')
             ->getQuery()
@@ -508,6 +518,148 @@ class SongController extends DefaultController
                 'playCount' => $song->getPlayCount(),
             ],
         ]);
+    }
+
+    public function deleteSong(
+        int $songId,
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        FileUploader $fileUploader
+    ): JsonResponse {
+        $user = $this->getAuthUser($request, $userRepository);
+        
+        // Проверяем, что пользователь является исполнителем
+        if (!$user->getSinger()) {
+            return $this->json([
+                'success' => false,
+                'error' => [
+                    'code' => Response::HTTP_FORBIDDEN,
+                    'message' => 'Only singers can delete songs',
+                ],
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $song = $entityManager->getRepository(Song::class)->find($songId);
+        if (!$song) {
+            return $this->json([
+                'success' => false,
+                'error' => [
+                    'code' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Song not found',
+                ],
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // Проверяем, что песня принадлежит исполнителю
+        $songBelongsToSinger = false;
+        foreach ($song->getSingers() as $singer) {
+            if ($singer->getId() === $user->getSinger()->getId()) {
+                $songBelongsToSinger = true;
+                break;
+            }
+        }
+
+        if (!$songBelongsToSinger) {
+            return $this->json([
+                'success' => false,
+                'error' => [
+                    'code' => Response::HTTP_FORBIDDEN,
+                    'message' => 'You can only delete your own songs',
+                ],
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        try {
+            // Удаляем файлы песни
+            $firstSinger = $song->getSingers()->first();
+            if ($firstSinger) {
+                $songFilePath = sprintf('%d/%d/song.mp3', $firstSinger->getId(), $song->getId());
+                $songImagePath = sprintf('%d/%d/photo.png', $firstSinger->getId(), $song->getId());
+                
+                $absoluteSongPath = $this->getParameter('upload_directory') . '/' . $songFilePath;
+                $absoluteImagePath = $this->getParameter('upload_directory') . '/' . $songImagePath;
+                
+                if (file_exists($absoluteSongPath)) {
+                    unlink($absoluteSongPath);
+                }
+                
+                if (file_exists($absoluteImagePath)) {
+                    unlink($absoluteImagePath);
+                }
+            }
+
+            // Удаляем связанные записи
+            $entityManager->getRepository(FavoriteSong::class)->createQueryBuilder('fs')
+                ->delete()
+                ->where('fs.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->execute();
+
+            $entityManager->getRepository(ListeningHistory::class)->createQueryBuilder('lh')
+                ->delete()
+                ->where('lh.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->execute();
+
+            $entityManager->getRepository(ReleaseSong::class)->createQueryBuilder('rs')
+                ->delete()
+                ->where('rs.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->execute();
+
+            // Удаляем песню из пользовательских плейлистов
+            $entityManager->getRepository(UserPlaylistSong::class)->createQueryBuilder('ups')
+                ->delete()
+                ->where('ups.song = :song')
+                ->setParameter('song', $song)
+                ->getQuery()
+                ->execute();
+
+            // Проверяем, не остались ли пустые релизы после удаления песни
+            $emptyReleases = $entityManager->getRepository(Release::class)
+                ->createQueryBuilder('r')
+                ->leftJoin('r.releaseSongs', 'rs')
+                ->where('rs.id IS NULL')
+                ->getQuery()
+                ->getResult();
+
+            foreach ($emptyReleases as $emptyRelease) {
+                // Удаляем связи с исполнителями
+                $entityManager->getRepository(ReleaseSinger::class)->createQueryBuilder('rs')
+                    ->delete()
+                    ->where('rs.release = :release')
+                    ->setParameter('release', $emptyRelease)
+                    ->getQuery()
+                    ->execute();
+
+                // Удаляем сам релиз
+                $entityManager->remove($emptyRelease);
+            }
+
+            // Удаляем саму песню
+            $entityManager->remove($song);
+            $entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'data' => [
+                    'message' => 'Song deleted successfully',
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => [
+                    'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'message' => 'Error deleting song: ' . $e->getMessage(),
+                ],
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
 

@@ -60,4 +60,13 @@ class CustomGenreRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findByTitleIgnoreCase(string $title): array
+    {
+        return $this->createQueryBuilder('cg')
+            ->andWhere('LOWER(cg.title) = LOWER(:title)')
+            ->setParameter('title', $title)
+            ->getQuery()
+            ->getResult();
+    }
 } 
